@@ -1,19 +1,24 @@
-import { controls } from '../../constants/controls';
+import {controls, GAME_CONTROL_KEYS} from '../../constants/controls';
+import {CRIT_POINTS_NEEDED_TO_CRIT_HIT} from '../../constants/fightConstants';
 
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
-    const arenaFirstFighter = createArenaFighter(firstFighter);
-    const arenaSecondFighter = createArenaFighter(secondFighter);
+    const firstArenaFighter = createArenaFighter(firstFighter);
+    firstArenaFighter.restartCritPoints();
+    const secondArenaFighter = createArenaFighter(secondFighter);
 
+    secondArenaFighter.restartCritPoints();
     const pressedKeys = new Map();
 
     document.addEventListener('keydown', (e) => {
+      if (e.repeat || !GAME_CONTROL_KEYS.some(key => key === e.code)) return;
+
       pressedKeys.set(e.code, true);
 
-      processFightAction(arenaFirstFighter, arenaSecondFighter, pressedKeys);
+      processFightAction(firstArenaFighter, secondArenaFighter, pressedKeys, e.code);
 
-      if (arenaFirstFighter.currentHealth <= 0 || arenaSecondFighter.currentHealth <= 0) {
-        const winner = arenaFirstFighter.currentHealth <= 0 ? secondFighter : firstFighter;
+      if (firstArenaFighter.currentHealth <= 0 || secondArenaFighter.currentHealth <= 0) {
+        const winner = firstArenaFighter.currentHealth <= 0 ? secondFighter : firstFighter;
         resolve(winner);
       }
     });
@@ -23,61 +28,71 @@ export async function fight(firstFighter, secondFighter) {
     });
   });
 }
-
+  
 function createArenaFighter(fighter) {
   return {
     ...fighter,
     currentHealth: fighter.health,
-    criticalHitCoolDown: new Date(),
-    setCoolDown() {
-      this.criticalHitCoolDown = new Date(0);
+    currentCritPoints: 0,
+
+    timerId: null,
+    canCrit() {
+      return this.currentCritPoints === CRIT_POINTS_NEEDED_TO_CRIT_HIT;
+    },
+    restartCritPoints() {
+      this.currentCritPoints = 0;
+      this.timerId = setInterval(() => {
+        this.currentCritPoints++;
+
+        if (this.canCrit()) {
+          clearInterval(this.timerId);
+        }
+      }, 1000);
     },
   };
 }
 
-function processFightAction(firstFighter, secondFighter, keyMap) {
+function processFightAction(firstFighter, secondFighter, keyMap, currentCode) {
   const leftHealthIndicator = document.getElementById('left-fighter-indicator');
   const rightHealthIndicator = document.getElementById('right-fighter-indicator');
 
-  switch(true) {
-    case keyMap.has(controls.PlayerOneAttack): {
-      applyFighterAttack(firstFighter, secondFighter, rightHealthIndicator, keyMap);
-    } break;
-    case keyMap.has(controls.PlayerTwoAttack): {
-      applyFighterAttack(secondFighter, firstFighter, leftHealthIndicator, keyMap);
-    } break;
-    case controls.PlayerOneCriticalHitCombination.every(code => keyMap.has(code)): {
-      applyFighterCriticalAttack(firstFighter, secondFighter, rightHealthIndicator);
-    } break;
-    case controls.PlayerTwoCriticalHitCombination.every(code => keyMap.has(code)): {
-      applyFighterCriticalAttack(secondFighter, firstFighter, leftHealthIndicator);
-    } break;
+  if (currentCode === controls.PlayerOneAttack) {
+    applyFighterAttack(firstFighter, secondFighter, rightHealthIndicator, keyMap);
+    return;
+  }
+  if (currentCode === controls.PlayerTwoAttack) {
+    applyFighterAttack(secondFighter, firstFighter, leftHealthIndicator, keyMap);
+    return;
+  }
+  if (controls.PlayerOneCriticalHitCombination.every(code => keyMap.has(code))) {
+    applyFighterCriticalAttack(firstFighter, secondFighter, rightHealthIndicator);
+    return;
+  }
+  if (controls.PlayerTwoCriticalHitCombination.every(code => keyMap.has(code))) {
+    applyFighterCriticalAttack(secondFighter, firstFighter, leftHealthIndicator);
   }
 }
 
 function applyFighterAttack(attacker, defender, healthIndicator, keyMap) {
-  if (isAttackBlocked(keyMap)) return;
+  if (isAttackBlocked(keyMap)) {
+    return;
+  }
 
   defender.currentHealth -= getDamage(attacker, defender);
   updateHealthIndicator(defender, healthIndicator);
 }
 
 function applyFighterCriticalAttack(attacker, defender, healthIndicator) {
-  if (isCriticalHitCoolDown(attacker)) return;
+  if (attacker.canCrit()) {
+    attacker.restartCritPoints();
 
-  defender.currentHealth -= attacker.attack * 2;
-  updateHealthIndicator(defender, healthIndicator);
-
-  attacker.setCoolDown();
+    defender.currentHealth -= attacker.attack * 2;
+    updateHealthIndicator(defender, healthIndicator);
+  }
 }
 
 function isAttackBlocked(keyMap) {
   return keyMap.has(controls.PlayerOneBlock) || keyMap.has(controls.PlayerTwoBlock);
-}
-
-function isCriticalHitCoolDown(attacker) {
-  const coolDownSeconds = (new Date().getTime() - attacker.criticalHitCoolDown.getTime()) / 1000;
-  return coolDownSeconds < 10;
 }
 
 export function getDamage(attacker, defender) {
@@ -85,20 +100,18 @@ export function getDamage(attacker, defender) {
 }
 
 export function getHitPower(fighter) {
-  const criticalHitChance = getRandomIntInclusive(1, 2);
+  const criticalHitChance = getRandomFloat(1, 2);
   const power = fighter.attack * criticalHitChance;
   return power;
 }
 
 export function getBlockPower(fighter) {
-  const dodgeChance = getRandomIntInclusive(1, 2);
+  const dodgeChance = getRandomFloat(1, 2);
   const power = fighter.defense * dodgeChance;
   return power;
 }
 
-export function getRandomIntInclusive(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
+export function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
@@ -108,4 +121,3 @@ function updateHealthIndicator(defender, indicator) {
   const indicatorWidth = Math.max(0, (currentHealth * 100) / health);
   indicator.style.width = `${indicatorWidth}%`;
 }
-
