@@ -1,0 +1,1 @@
+export const CRIT_POINTS_NEEDED_TO_CRIT_HIT = 10;
