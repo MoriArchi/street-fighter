@@ -24,11 +24,17 @@ export async function fight(firstFighter, secondFighter) {
     });
 
     document.addEventListener('keyup', (e) => {
+      if (e.code === controls.PlayerOneBlock) {
+        toggleShield(false, 'left');
+      }
+      if (e.code === controls.PlayerTwoBlock) {
+        toggleShield(false, 'right');
+      }
       pressedKeys.delete(e.code);
     });
   });
 }
-  
+
 function createArenaFighter(fighter) {
   return {
     ...fighter,
@@ -56,6 +62,12 @@ function processFightAction(firstFighter, secondFighter, keyMap, currentCode) {
   const leftHealthIndicator = document.getElementById('left-fighter-indicator');
   const rightHealthIndicator = document.getElementById('right-fighter-indicator');
 
+  if (currentCode === controls.PlayerOneBlock) {
+    toggleShield(true, 'left');
+  }
+  if (currentCode === controls.PlayerTwoBlock) {
+    toggleShield(true, 'right');
+  }
   if (currentCode === controls.PlayerOneAttack) {
     applyFighterAttack(firstFighter, secondFighter, rightHealthIndicator, keyMap);
     return;
@@ -116,8 +128,17 @@ export function getRandomFloat(min, max) {
 }
 
 function updateHealthIndicator(defender, indicator) {
-  const { health, currentHealth } = defender;
+  const {health, currentHealth} = defender;
 
   const indicatorWidth = Math.max(0, (currentHealth * 100) / health);
   indicator.style.width = `${indicatorWidth}%`;
+}
+
+function toggleShield(show, position) {
+  const shield = document.getElementById(`${position}-shield`);
+  if (show) {
+    shield.style.visibility = 'visible';
+  } else {
+    shield.style.visibility = 'hidden';
+  }
 }

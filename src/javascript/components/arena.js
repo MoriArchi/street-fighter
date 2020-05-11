@@ -23,16 +23,17 @@ function createArena(selectedFighters) {
   const arena = createElement({ tagName: 'div', className: 'arena___root' });
   const healthIndicators = createHealthIndicators(...selectedFighters);
   const fighters = createFighters(...selectedFighters);
+  const shields = createShields(...selectedFighters);
   
-  arena.append(healthIndicators, fighters);
+  arena.append(healthIndicators, fighters, shields);
   return arena;
 }
 
-function createHealthIndicators(leftFighter, rightFighter) {
+function createHealthIndicators(firstFighter, secondFighter) {
   const healthIndicators = createElement({ tagName: 'div', className: 'arena___fight-status' });
   const versusSign = createElement({ tagName: 'div', className: 'arena___versus-sign' });
-  const leftFighterIndicator = createHealthIndicator(leftFighter, 'left');
-  const rightFighterIndicator = createHealthIndicator(rightFighter, 'right');
+  const leftFighterIndicator = createHealthIndicator(firstFighter, 'left');
+  const rightFighterIndicator = createHealthIndicator(secondFighter, 'right');
 
   healthIndicators.append(leftFighterIndicator, versusSign, rightFighterIndicator);
   return healthIndicators;
@@ -71,4 +72,38 @@ function createFighter(fighter, position) {
 
   fighterElement.append(imgElement);
   return fighterElement;
+}
+
+function createShields(firstFighter, secondFighter) {
+  const container = createElement({ tagName: 'div', className: `arena___shields-container` });
+  const firstFighterShield = createShield(firstFighter, 'left');
+  const secondFighterShield = createShield(secondFighter, 'right');
+
+  container.append(firstFighterShield, secondFighterShield);
+  return container;
+}
+
+function createShield(fighter, position) {
+  const imgElement = createShieldImage();
+  const positionClassName = position === 'right' ? 'arena___right-shield' : 'arena___left-shield';
+  const shieldElement = createElement({
+    tagName: 'div',
+    className: `${positionClassName}`,
+    attributes: { id: `${position}-shield` }
+  });
+
+  shieldElement.append(imgElement);
+  return shieldElement;
+}
+
+function createShieldImage() {
+  const attributes = {
+    src: '../../resources/shield.png',
+    alt: 'shield'
+  };
+  return createElement({
+    tagName: 'img',
+    className: 'shield-img',
+    attributes,
+  });
 }
