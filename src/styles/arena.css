@@ -61,3 +61,19 @@
   width: 100%;
   background-color: #ebd759;
 }
+
+.arena___shields-container {
+  top: 40%;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: space-around;
+}
+
+.arena___right-shield, .arena___left-shield {
+  visibility: hidden;
+}
+
+.shield-img {
+  height: 25vh;
+}
