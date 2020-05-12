@@ -1,8 +1,8 @@
-export function updateHealthIndicator(defender, indicator) {
-  const {health, currentHealth} = defender;
+export function updateHealthIndicator(currentHealth, health, position) {
+  const healthIndicator = document.getElementById(`${position}-fighter-indicator`);
 
   const indicatorWidth = Math.max(0, (currentHealth * 100) / health);
-  indicator.style.width = `${indicatorWidth}%`;
+  healthIndicator.style.width = `${indicatorWidth}%`;
 }
 
 export function toggleShield(show, position) {
@@ -22,11 +22,47 @@ export function showAttack(position, attack) {
   }, 300);
 }
 
-export function toggleCritIndicator(show, position) {
-  const indicator = document.getElementById(`${position}-crit-indicator`);
-  if(show) {
+export function toggleCritSignal(show, position) {
+  const indicator = document.getElementById(`${position}-crit-signal`);
+  if (show) {
     indicator.style.visibility = 'visible';
   } else {
     indicator.style.visibility = 'hidden';
   }
 }
+
+export function updateRageIndicator(position, width) {
+  const rageIndicator = document.getElementById(`${position}-rage-indicator`);
+  rageIndicator.style.width = `${width}%`;
+}
+
+export const createCritPointsUpdatedHandler = (position) => (currentPoints, canCrit) => {
+  if (currentPoints === 0) {
+    toggleCritSignal(false, position);
+  }
+
+  if (canCrit) {
+    toggleCritSignal(true, position);
+  }
+
+  updateRageIndicator(position, currentPoints * 10);
+};
+
+export const createIsBlockingChangedHandler = position => (isBlocking) => {
+  toggleShield(isBlocking, position)
+};
+
+export const createIsDamageReceivedHandler = position => (currentHealth, health) => {
+  updateHealthIndicator(currentHealth, health, position);
+};
+
+export const createIsAttackingHandler = position => (attack) => {
+  showAttack(position, attack)
+};
+
+export const createFighterConfigs = position => ({
+  onPointsUpdated: createCritPointsUpdatedHandler(position),
+  onIsBlockingChanged: createIsBlockingChangedHandler(position),
+  onDamageReceived: createIsDamageReceivedHandler(position),
+  onAttacking: createIsAttackingHandler(position)
+});

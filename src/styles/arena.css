@@ -1,81 +1,99 @@
 .arena___root {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-image: url('../../resources/arena.jpg');
-  background-repeat: no-repeat;
-  background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-image: url('../../resources/arena.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .arena___battlefield {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 60px;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 60px;
 }
 
 .arena___right-fighter img {
-  transform: scaleX(-1);
+    transform: scaleX(-1);
 }
 
 .arena___fighter img {
-  height: 480px;
+    height: 480px;
 }
 
 .arena___fight-status {
-  display: flex;
-  margin: 30px;
-  justify-content: center;
+    display: flex;
+    margin: 30px 30px 0 30px;
+    justify-content: center;
+}
+
+.arena___rage-indicators {
+    display: flex;
+    margin: 0 30px 30px 30px;
+    justify-content: center;
 }
 
 .arena___fighter-name {
-  color: black;
-  -webkit-text-fill-color: white;
-  -webkit-text-stroke-width: 1px;
-  font-size: 26px;
-  font-family: 'Arial Black';
-  font-weight: 700;
+    color: black;
+    -webkit-text-fill-color: white;
+    -webkit-text-stroke-width: 1px;
+    font-size: 26px;
+    font-family: 'Arial Black';
+    font-weight: 700;
 }
 
-.arena___fighter-indicator {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  margin: 0 30px;
+.arena___fighter-indicator, .arena___rage-indicator {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin: 0 30px;
 }
 
-.arena___health-indicator {
-  width: 100%;
-  height: 25px;
-  border: 2px solid;
-  border-radius: 5px;
-  margin: 0 10px;
-  overflow: hidden;
+.arena___health-indicator, .arena___fighter-rage {
+    width: 100%;
+    height: 25px;
+    border: 2px solid;
+    border-radius: 5px;
+    margin: 0 10px;
+    overflow: hidden;
 }
 
 .arena___health-bar {
-  height: 100%;
-  width: 100%;
-  background-color: #ebd759;
+    height: 100%;
+    width: 100%;
+    background-color: #ebd759;
+}
+
+.arena___rage-bar {
+    height: 100%;
+    width: 100%;
+    color: white;
+    background-color: #ff4500;
+    -webkit-text-fill-color: darkred;
+    -webkit-text-stroke-width: 1px;
+    font-size: 20px;
+    font-family: 'Arial Black';
+    font-weight: 700;
 }
 
 .arena___shields-container {
-  top: 40%;
-  width: 100%;
-  position: absolute;
-  display: flex;
-  justify-content: space-around;
+    top: 40%;
+    width: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: space-around;
 }
 
 .arena___right-shield, .arena___left-shield {
-  visibility: hidden;
+    visibility: hidden;
 }
 
 .shield-img {
-  height: 25vh;
+    height: 25vh;
 }
 
 .arena___punches-container, .arena___fireballs-container {
@@ -122,7 +140,7 @@
     height: 25vh;
 }
 
-.arena___crit-indicators-container {
+.arena___crit-signals-container {
     position: absolute;
     top: 2%;
     left: 5%;
@@ -131,7 +149,7 @@
     justify-content: space-between;
 }
 
-.arena___crit-indicators-container .fireball-img {
+.arena___crit-signals-container .fireball-img {
     height: 10vh;
 }
 
