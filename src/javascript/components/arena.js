@@ -24,8 +24,11 @@ function createArena(selectedFighters) {
   const healthIndicators = createHealthIndicators(...selectedFighters);
   const fighters = createFighters(...selectedFighters);
   const shields = createShields(...selectedFighters);
+  const punches = createPunches(...selectedFighters);
+  const fireballs = createFireballs(...selectedFighters);
+  const critIndicators = createCritIndicators(...selectedFighters);
   
-  arena.append(healthIndicators, fighters, shields);
+  arena.append(healthIndicators, fighters, shields, punches, fireballs, critIndicators);
   return arena;
 }
 
@@ -106,4 +109,94 @@ function createShieldImage() {
     className: 'shield-img',
     attributes,
   });
+}
+
+function createPunches(firstFighter, secondFighter) {
+  const container = createElement({ tagName: 'div', className: `arena___punches-container` });
+  const firstFighterPunch = createPunch(firstFighter, 'left');
+  const secondFighterPunch = createPunch(secondFighter, 'right');
+
+  container.append(firstFighterPunch, secondFighterPunch);
+  return container;
+}
+
+function createPunch(fighter, position) {
+  const imgElement = createPunchImage();
+  const positionClassName = position === 'right' ? 'arena___right-punch' : 'arena___left-punch';
+  const fistElement = createElement({
+    tagName: 'div',
+    className: `${positionClassName}`,
+    attributes: { id: `${position}-punch` }
+  });
+
+  fistElement.append(imgElement);
+  return fistElement;
+}
+
+function createPunchImage() {
+  const attributes = {
+    src: '../../resources/punch.png',
+    alt: 'punch'
+  };
+  return createElement({
+    tagName: 'img',
+    className: 'punch-img',
+    attributes,
+  });
+}
+
+function createFireballs(firstFighter, secondFighter) {
+  const container = createElement({ tagName: 'div', className: `arena___fireballs-container` });
+  const firstFighterBall = createFireball(firstFighter, 'left');
+  const secondFighterBall = createFireball(secondFighter, 'right');
+
+  container.append(firstFighterBall, secondFighterBall);
+  return container;
+}
+
+function createFireball(fighter, position) {
+  const imgElement = createFireballImage();
+  const positionClassName = position === 'right' ? 'arena___right-fireball' : 'arena___left-fireball';
+  const fireballElement = createElement({
+    tagName: 'div',
+    className: `${positionClassName}`,
+    attributes: { id: `${position}-fireball` }
+  });
+
+  fireballElement.append(imgElement);
+  return fireballElement;
+}
+
+function createFireballImage() {
+  const attributes = {
+    src: '../../resources/fireball.gif',
+    alt: 'fireball'
+  };
+  return createElement({
+    tagName: 'img',
+    className: 'fireball-img',
+    attributes,
+  });
+}
+
+function createCritIndicators(firstFighter, secondFighter) {
+  const container = createElement({ tagName: 'div', className: `arena___crit-indicators-container` });
+  const firstFighterSuper = createCritIndicator(firstFighter, 'left');
+  const secondFighterSuper = createCritIndicator(secondFighter, 'right');
+
+  container.append(firstFighterSuper, secondFighterSuper);
+  return container;
+}
+
+function createCritIndicator(fighter, position) {
+  const imgElement = createFireballImage();
+  const positionClassName = position === 'right' ? 'arena___right-crit-indicator' : 'arena___left-crit-indicator';
+  const critIndicatorElement = createElement({
+    tagName: 'div',
+    className: `${positionClassName}`,
+    attributes: { id: `${position}-crit-indicator` }
+  });
+
+  critIndicatorElement.append(imgElement);
+  return critIndicatorElement;
 }

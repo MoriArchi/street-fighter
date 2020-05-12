@@ -1,11 +1,12 @@
 import {controls, GAME_CONTROL_KEYS} from '../../constants/controls';
 import {CRIT_POINTS_NEEDED_TO_CRIT_HIT} from '../../constants/fightConstants';
+import { updateHealthIndicator, toggleShield, showAttack, toggleCritIndicator } from './fightViewChanges';
 
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
-    const firstArenaFighter = createArenaFighter(firstFighter);
+    const firstArenaFighter = createArenaFighter(firstFighter, 'left');
     firstArenaFighter.restartCritPoints();
-    const secondArenaFighter = createArenaFighter(secondFighter);
+    const secondArenaFighter = createArenaFighter(secondFighter, 'right');
 
     secondArenaFighter.restartCritPoints();
     const pressedKeys = new Map();
@@ -35,7 +36,7 @@ export async function fight(firstFighter, secondFighter) {
   });
 }
 
-function createArenaFighter(fighter) {
+function createArenaFighter(fighter, position) {
   return {
     ...fighter,
     currentHealth: fighter.health,
@@ -46,11 +47,13 @@ function createArenaFighter(fighter) {
       return this.currentCritPoints === CRIT_POINTS_NEEDED_TO_CRIT_HIT;
     },
     restartCritPoints() {
+      toggleCritIndicator(false, position);
       this.currentCritPoints = 0;
       this.timerId = setInterval(() => {
         this.currentCritPoints++;
 
         if (this.canCrit()) {
+          toggleCritIndicator(true, position);
           clearInterval(this.timerId);
         }
       }, 1000);
@@ -68,34 +71,39 @@ function processFightAction(firstFighter, secondFighter, keyMap, currentCode) {
   if (currentCode === controls.PlayerTwoBlock) {
     toggleShield(true, 'right');
   }
+
   if (currentCode === controls.PlayerOneAttack) {
-    applyFighterAttack(firstFighter, secondFighter, rightHealthIndicator, keyMap);
+    applyFighterAttack(firstFighter, secondFighter, rightHealthIndicator, keyMap, 'left');
     return;
   }
   if (currentCode === controls.PlayerTwoAttack) {
-    applyFighterAttack(secondFighter, firstFighter, leftHealthIndicator, keyMap);
+    applyFighterAttack(secondFighter, firstFighter, leftHealthIndicator, keyMap, 'right');
     return;
   }
   if (controls.PlayerOneCriticalHitCombination.every(code => keyMap.has(code))) {
-    applyFighterCriticalAttack(firstFighter, secondFighter, rightHealthIndicator);
+    applyFighterCriticalAttack(firstFighter, secondFighter, rightHealthIndicator, 'left');
     return;
   }
   if (controls.PlayerTwoCriticalHitCombination.every(code => keyMap.has(code))) {
-    applyFighterCriticalAttack(secondFighter, firstFighter, leftHealthIndicator);
+    applyFighterCriticalAttack(secondFighter, firstFighter, leftHealthIndicator, 'right');
   }
 }
 
-function applyFighterAttack(attacker, defender, healthIndicator, keyMap) {
+function applyFighterAttack(attacker, defender, healthIndicator, keyMap, position) {
   if (isAttackBlocked(keyMap)) {
+    showAttack(position, 'punch');
     return;
   }
+  showAttack(position, 'punch');
 
   defender.currentHealth -= getDamage(attacker, defender);
   updateHealthIndicator(defender, healthIndicator);
 }
 
-function applyFighterCriticalAttack(attacker, defender, healthIndicator) {
+function applyFighterCriticalAttack(attacker, defender, healthIndicator, position) {
   if (attacker.canCrit()) {
+
+    showAttack(position, 'fireball');
     attacker.restartCritPoints();
 
     defender.currentHealth -= attacker.attack * 2;
@@ -107,38 +115,21 @@ function isAttackBlocked(keyMap) {
   return keyMap.has(controls.PlayerOneBlock) || keyMap.has(controls.PlayerTwoBlock);
 }
 
-export function getDamage(attacker, defender) {
+function getDamage(attacker, defender) {
   return getHitPower(attacker) - getBlockPower(defender) > 0 ? getHitPower(attacker) - getBlockPower(defender) : 0;
 }
-
-export function getHitPower(fighter) {
+function getHitPower(fighter) {
   const criticalHitChance = getRandomFloat(1, 2);
   const power = fighter.attack * criticalHitChance;
   return power;
 }
 
-export function getBlockPower(fighter) {
+function getBlockPower(fighter) {
   const dodgeChance = getRandomFloat(1, 2);
   const power = fighter.defense * dodgeChance;
   return power;
 }
 
-export function getRandomFloat(min, max) {
+function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
-}
-
-function updateHealthIndicator(defender, indicator) {
-  const {health, currentHealth} = defender;
-
-  const indicatorWidth = Math.max(0, (currentHealth * 100) / health);
-  indicator.style.width = `${indicatorWidth}%`;
-}
-
-function toggleShield(show, position) {
-  const shield = document.getElementById(`${position}-shield`);
-  if (show) {
-    shield.style.visibility = 'visible';
-  } else {
-    shield.style.visibility = 'hidden';
-  }
 }
